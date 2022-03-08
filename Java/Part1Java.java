@@ -20,10 +20,13 @@ public class Part1Java {
 
 
         master.start();
-        Thread.sleep(2*N);
+        Thread.sleep(2*M);
+        System.out.println("hello1");
         for (int i = 0; i < N; i++) {
             slave[i] = new Thread(producerConsumer.Consumer(i));
+            System.out.println("hello2");
             slave[i].start();
+            System.out.println("hello3");
         }
         master.join();
         for (int i = 0; i < N; i++) {
