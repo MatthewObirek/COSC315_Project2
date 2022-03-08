@@ -14,25 +14,22 @@ public class Part1Java {
         final ProducerConsumer producerConsumer = new ProducerConsumer(N, M);
 
         // Create threads:
-        Thread master = new Thread(new Runnable() {
-            @Override
-            public void run(){
-                try {
-                    producerConsumer.Producer();
+       // Thread 
+        Thread master = new Thread(producerConsumer.Producer(M));
+        Thread slave[] = new Thread[N];
 
-                    for (int i = 0; i < N; i++){
-                        producerConsumer.Consumer();
-                    }
-                    
-                } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-        });
 
         master.start();
-
+        Thread.sleep(2*N);
+        for (int i = 0; i < N; i++) {
+            slave[i] = new Thread(producerConsumer.Consumer(i));
+            slave[i].start();
+        }
         master.join();
+        for (int i = 0; i < N; i++) {
+            slave[i].join();
+        }
+        sc.close();
     }
+    
 };
