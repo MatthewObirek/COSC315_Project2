@@ -1,16 +1,16 @@
 package Java;
 
 import java.time.LocalTime;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.locks.Lock;
+//import java.util.concurrent.locks.Lock;
 
 public class ProducerConsumer {
     // circular buffer = linked list
-    private volatile LinkedList<Integer> buffer = new LinkedList<>();
+    private volatile ArrayList<Integer> buffer;
     private Semaphore full;
     private Semaphore empty;
-    private Object mutex;
+    private static final Object mutex = new Object();
     // private var N = size of queue (buffer) and the num of consumers
     private volatile int N = 0;
     // private var M = how long a producer should sleep before producing next
@@ -22,9 +22,9 @@ public class ProducerConsumer {
     public ProducerConsumer(int num, int sleepLength){
         this.N = num;
         this.M = sleepLength;
+        buffer = new ArrayList<Integer>(num);
         empty = new Semaphore(0);
         full = new Semaphore(num);
-        mutex = new Object();
     }
 
     // methods
@@ -38,14 +38,17 @@ public class ProducerConsumer {
                 while (true) {
                     LocalTime CURRENT_TIME = LocalTime.now();
                     int randomLength = (int) (Math.random() * M) + 1;
-                    System.out.println("helloPro1");
+                    try {
+                        empty.acquire();
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
                     synchronized(mutex){
-                        System.out.println("helloPro2");
-                        try {
-                            empty.acquire();
-                        } catch (InterruptedException e1) {
-                            e1.printStackTrace();
-                        }
+                        //try {
+                        //    empty.acquire();
+                        //} catch (InterruptedException e1) {
+                        //    e1.printStackTrace();
+                        //}
                         
                         
                         // add to buffer (index = requestID and item stored in buffer = randomLength)
@@ -56,10 +59,10 @@ public class ProducerConsumer {
                         System.out.println("Producer: sleeping for " + M + " miliseconds\n");
 
                         requestID ++;
-
+                    }
                         // signal that the condition the consumer thread is waiting on is satisfied
                         full.release();                        
-                    }
+                    
                     // Tells the parent thread to wait if the buffer is full
                     //while(buffer.size() == this.N){
 
@@ -84,22 +87,23 @@ public class ProducerConsumer {
                 while (true){
 
                     //while the buffer is empty the threat should wait
-                    int length;
+                    int length = 0;
                     LocalTime CURRENT_TIME;
-                    System.out.println("helloCon1");
+                    while(buffer.size()-1 < id) {}
+
                     synchronized (mutex){
-                        System.out.println("helloCon2");
-                    //for(int i = 0; i < this.N; i++){
-                    CURRENT_TIME = LocalTime.now();
+                        //for(int i = 0; i < this.N; i++){
+                        CURRENT_TIME = LocalTime.now();
 
-                    // get ID and length, then remove request from buffer
-
-                    length = buffer.get(id);
+                        // get ID and length, then remove request from buffer
+                        
+                        length = buffer.get(id);
                     }// mutex.unlock();
+                    
                     empty.release();
                     // print statement
                     System.out.println("Consumer: assigned request ID " + id + " , processing request for the next " + length/1000 + " seconds, current time is " + CURRENT_TIME);
-
+                    
                     // thread is busy for the amount of time specified from the buffer
                     
                     try {

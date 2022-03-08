@@ -24,9 +24,9 @@ public class Part1Java {
         System.out.println("hello1");
         for (int i = 0; i < N; i++) {
             slave[i] = new Thread(producerConsumer.Consumer(i));
-            System.out.println("hello2");
+            //System.out.println("hello2");
             slave[i].start();
-            System.out.println("hello3");
+            //System.out.println("hello3");
         }
         master.join();
         for (int i = 0; i < N; i++) {
