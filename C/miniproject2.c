@@ -6,13 +6,14 @@
 #include <time.h>
 #include <semaphore.h>
 
-
+//Global Variable That must be stated in the code
+#define N 10
 
 
 sem_t s_full;         
 sem_t s_empty; 
 pthread_mutex_t mutex;
-int requestBuffer[10];
+int requestBuffer[N];
 int requestID = 0;
 char* showTime(){
 	time_t t;
@@ -33,12 +34,12 @@ char* showTime(){
 void *producerThread(void *args){
 	
      while (1) {
-        int requestLen = rand() % 10;
+        int requestLen = rand() % N;
         sem_wait(&s_empty);
         // locking the access 
         pthread_mutex_lock(&mutex);
-		if(requestID > 9){
-		  requestBuffer[requestID%10] = requestLen;
+		if(requestID > (N-1)){
+		  requestBuffer[requestID%N] = requestLen;
           requestID++;
 		}else{
           requestBuffer[requestID] = requestLen;
@@ -50,7 +51,7 @@ void *producerThread(void *args){
 		printf("Request: request ID %d, length %d seconds at time %s\n",requestID,requestLen,showTime());
         // increment a value in the full semaphore indicating one more space is taken in the buffer
         sem_post(&s_full);
-		int sleepTime = (rand()%10)+1;
+		int sleepTime = (rand()%N)+1;
 		printf("Request: sleeping for %d seconds\n",sleepTime);
 		sleep(sleepTime);
         printf("--------------------------------------------\n");
@@ -68,7 +69,7 @@ void *consumerThread(void *args){
         // decrement it if there is a value indicating full sempahore
         sem_wait(&s_full);
         pthread_mutex_lock(&mutex);
-        requestLength = requestBuffer[(requestID%10)- 1];
+        requestLength = requestBuffer[(requestID%N)- 1];
 		id = requestID;
         pthread_mutex_unlock(&mutex);
          // put and increment in the empty semaphore indicating there is a free slot in the buffer

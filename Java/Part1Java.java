@@ -14,19 +14,18 @@ public class Part1Java {
         final ProducerConsumer producerConsumer = new ProducerConsumer(N, M);
 
         // Create threads:
-       // Thread 
+        // Threads 
         Thread master = new Thread(producerConsumer.Producer(M));
         Thread slave[] = new Thread[N];
 
 
         master.start();
+        // Allows Master Thread to put data in Buffer
         Thread.sleep(2*M);
-        System.out.println("hello1");
+        //Initializes Consumer
         for (int i = 0; i < N; i++) {
             slave[i] = new Thread(producerConsumer.Consumer(i));
-            //System.out.println("hello2");
             slave[i].start();
-            //System.out.println("hello3");
         }
         master.join();
         for (int i = 0; i < N; i++) {
